@@ -1,69 +1,61 @@
-size_of_board: int = 9
-
-def print_board(arr: list[list[int]]) -> None:
-    for i in range(size_of_board):
-        for j in range(size_of_board):
-            print(arr[i][j], end=" ")
+def print_grid(grid: list[list[int]]) -> None:
+    for i in range(9):
+        for j in range(9):
+            print(grid[i][j], end=" ")
         print()
         
-def isSuitable(grid: list[list[int]], row: int, column: int, number: int) -> bool:
+def find_empty_location(grid: list[list[int]], position: list[int]) -> bool:
+    for row in range(9):
+        for column in range(9):
+            if (grid[row][column] == 0):
+                position[0] = row
+                position[1] = column
+                return True
+    return False
+
+def used_in_row(grid: list[list[int]], row: int, number: int) -> bool:
     for i in range(9):
-        if grid[row][i] == number:
-            return False
+        if (grid[row][i] == number):
+            return True
+    return False
+
+def used_in_column(grid: list[list[int]], column: int, number: int) -> bool:
     for i in range(9):
-        if grid[i][column] == number:
-            return False
-    
-    start_row: int = row - row % 3
-    start_column: int = column - column % 3
+        if (grid[i][column] == number):
+            return True
+    return False
+
+def used_in_box(grid: list[list[int]], row: int, column: int, number: int) -> bool:
     for i in range(3):
         for j in range(3):
-            if grid[i + start_row][j + start_column] == number:
-                return False
-    
-    return True
+            if (grid[i + row][j + column] == number):
+                return True
+    return False
 
-def solve(grid: list[list[int]], row: int, column: int) -> bool:
-    if (row == size_of_board - 1 and column == size_of_board):
+def is_safe(grid: list[list[int]], row: int, column: int, number: int) -> bool:
+    return (not used_in_row(grid, row, number) and
+           (not used_in_column(grid, column, number) and
+           (not used_in_box(grid, row - row % 3,
+                            column - column % 3, number))))
+    
+def solve(grid: list[list[int]]) -> bool:
+    position: list[int] = [0, 0]
+    
+    if (not find_empty_location(grid, position)):
         return True
     
-    if column == size_of_board:
-        row += 1
-        column = 0
-        
-    if grid[row][column] > 0:
-        return solve(grid, row, column + 1)
-    for number in range(1, size_of_board + 1, 1):
-        if isSuitable(grid, row, column, number):
+    row: int = position[0]
+    column: int = position[1]
+    
+    for number in range(1, 10):
+        if (is_safe(grid, row, column, number)):
             grid[row][column] = number
-            if solve(grid, row, column + 1):
+            if solve(grid):
                 return True
-        grid[row][column] = 0
+            grid[row][column] = 0
     return False
 
 def main() -> None:
-    grid = [[3, 0, 6, 5, 0, 8, 4, 0, 0],
-        [5, 2, 0, 0, 0, 0, 0, 0, 0],
-        [0, 8, 7, 0, 0, 0, 0, 3, 1],
-        [0, 0, 3, 0, 1, 0, 0, 8, 0],
-        [9, 0, 0, 8, 6, 3, 0, 0, 5],
-        [0, 5, 0, 0, 9, 0, 6, 0, 0],
-        [1, 3, 0, 0, 0, 0, 2, 5, 0],
-        [0, 0, 0, 0, 0, 0, 0, 7, 4],
-        [0, 0, 5, 2, 0, 6, 3, 0, 0]]
-    
-    grid: list[list[int]] = [
-        [0, 0, 4, 6, 7, 2, 0, 0, 0],
-        [5, 0, 0, 8, 0, 0, 0, 9, 6],
-        [0, 6, 3, 0, 4, 0, 0, 0, 8],
-        [3, 8, 2, 1, 0, 0, 9, 6, 0],
-        [4, 7, 5, 0, 0, 0, 1, 0, 0],
-        [9, 1, 0, 2, 0, 4, 5, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 2, 9],
-        [0, 0, 1, 0, 0, 0, 7, 4, 3],
-        [2, 0, 0, 0, 6, 3, 8, 0, 1]
-        ]
-    
     grid: list[list[int]] = [
         [0, 0, 0, 0, 0, 0, 0, 2, 3],
         [0, 0, 0, 0, 0, 0, 7, 5, 0],
@@ -75,11 +67,11 @@ def main() -> None:
         [0, 4, 0, 1, 0, 0, 0, 0, 5],
         [8, 0, 0, 0, 0, 5, 6, 0, 0]
     ]
-
-    if (solve(grid, 0, 0)):
-        print_board(grid)
+    
+    if solve(grid):
+        print_grid(grid)
     else:
-        print("no solution  exists ")
-        
+        print("No solution exists")
+
 if __name__ == "__main__":
     main()
